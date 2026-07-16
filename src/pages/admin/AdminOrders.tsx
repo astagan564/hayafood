@@ -4,7 +4,7 @@ import type { Order, OrderItem } from '../../types';
 import { formatRupiah, formatDate } from '../../lib/format';
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from '../../types';
 import { useToast } from '../../hooks/useToast';
-import { Eye, X } from 'lucide-react';
+import { Eye, X, Trash2 } from 'lucide-react';
 
 export function AdminOrders() {
   const { show } = useToast();
@@ -41,6 +41,17 @@ export function AdminOrders() {
       .select('*')
       .eq('order_id', order.id);
     setSelectedOrder({ order, items: data || [] });
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Hapus pesanan ini? Aksi ini akan menghapus data penjualan dari ringkasan laporan.')) return;
+    const { error } = await supabase.from('orders').delete().eq('id', id);
+    if (error) {
+      show('Gagal menghapus pesanan', 'error');
+    } else {
+      show('Pesanan berhasil dihapus');
+      fetchOrders();
+    }
   };
 
   return (
@@ -105,13 +116,23 @@ export function AdminOrders() {
                         ))}
                       </select>
                     </td>
-                    <td className="py-3">
-                      <button
-                        onClick={() => viewOrder(order)}
-                        className="p-1.5 rounded-lg hover:bg-brand-50 text-gray-500 hover:text-brand-600 transition-colors"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
+                     <td className="py-3">
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => viewOrder(order)}
+                          className="p-1.5 rounded-lg hover:bg-brand-50 text-gray-500 hover:text-brand-600 transition-colors"
+                          title="Lihat Detail"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(order.id)}
+                          className="p-1.5 rounded-lg hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors"
+                          title="Hapus Pesanan"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -144,12 +165,20 @@ export function AdminOrders() {
                   <span className="text-gray-500">{formatDate(order.created_at)}</span>
                   <span className="font-semibold text-brand-600">{formatRupiah(order.total)}</span>
                 </div>
-                <button
-                  onClick={() => viewOrder(order)}
-                  className="mt-2 text-xs text-brand-600 font-medium flex items-center gap-1"
-                >
-                  <Eye className="w-3 h-3" /> Lihat detail
-                </button>
+                <div className="flex gap-4 mt-3 pt-2 border-t border-gray-50">
+                  <button
+                    onClick={() => viewOrder(order)}
+                    className="text-xs text-brand-600 font-semibold flex items-center gap-1 hover:text-brand-700 transition-colors"
+                  >
+                    <Eye className="w-3.5 h-3.5" /> Lihat detail
+                  </button>
+                  <button
+                    onClick={() => handleDelete(order.id)}
+                    className="text-xs text-red-600 font-semibold flex items-center gap-1 hover:text-red-700 transition-colors ml-auto"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" /> Hapus pesanan
+                  </button>
+                </div>
               </div>
             ))}
           </div>
