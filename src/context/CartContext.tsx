@@ -37,10 +37,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const existing = prev.find((i) => i.product.id === product.id);
       if (existing) {
         return prev.map((i) =>
-          i.product.id === product.id ? { ...i, jumlah: i.jumlah + jumlah } : i
+          i.product.id === product.id ? { ...i, jumlah: Math.min(product.stok, i.jumlah + jumlah) } : i
         );
       }
-      return [...prev, { product, jumlah }];
+      return [...prev, { product, jumlah: Math.min(product.stok, jumlah) }];
     });
   };
 
@@ -54,7 +54,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return;
     }
     setItems((prev) =>
-      prev.map((i) => (i.product.id === productId ? { ...i, jumlah } : i))
+      prev.map((i) => (i.product.id === productId ? { ...i, jumlah: Math.min(i.product.stok, jumlah) } : i))
     );
   };
 

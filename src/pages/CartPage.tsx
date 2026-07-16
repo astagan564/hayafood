@@ -73,7 +73,8 @@ export function CartPage() {
                     <span className="w-10 text-center text-sm font-semibold">{item.jumlah}</span>
                     <button
                       onClick={() => updateQuantity(item.product.id, item.jumlah + 1)}
-                      className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-r-lg transition-colors"
+                      disabled={item.jumlah >= item.product.stok}
+                      className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-r-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       <Plus className="w-3 h-3" />
                     </button>

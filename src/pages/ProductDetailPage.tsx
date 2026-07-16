@@ -6,11 +6,14 @@ import { formatRupiah } from '../lib/format';
 import { useCart } from '../hooks/useCart';
 import { useToast } from '../hooks/useToast';
 import { Link, navigate } from '../lib/router';
+import { ProductCard } from '../components/ProductCard';
 
 export function ProductDetailPage({ productId }: { productId: string }) {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [jumlah, setJumlah] = useState(1);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [relatedLoading, setRelatedLoading] = useState(false);
   const { addToCart } = useCart();
   const { show } = useToast();
 
@@ -26,6 +29,25 @@ export function ProductDetailPage({ productId }: { productId: string }) {
         setLoading(false);
       });
   }, [productId]);
+
+  useEffect(() => {
+    if (!product || !product.category_id) {
+      setRelatedProducts([]);
+      return;
+    }
+    setRelatedLoading(true);
+    supabase
+      .from('products')
+      .select('*, categories(*)')
+      .eq('category_id', product.category_id)
+      .eq('is_active', true)
+      .neq('id', product.id)
+      .limit(4)
+      .then(({ data }) => {
+        setRelatedProducts(data || []);
+        setRelatedLoading(false);
+      });
+  }, [product]);
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -124,20 +146,28 @@ export function ProductDetailPage({ productId }: { productId: string }) {
           {/* Quantity */}
           <div className="flex items-center gap-4 mb-6">
             <span className="text-sm font-medium text-gray-700">Jumlah</span>
-            <div className="flex items-center gap-1 border border-gray-200 rounded-xl">
-              <button
-                onClick={() => setJumlah((j) => Math.max(1, j - 1))}
-                className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-l-xl transition-colors"
-              >
-                <Minus className="w-4 h-4" />
-              </button>
-              <span className="w-12 text-center font-semibold">{jumlah}</span>
-              <button
-                onClick={() => setJumlah((j) => j + 1)}
-                className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-r-xl transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1 border border-gray-200 rounded-xl">
+                <button
+                  onClick={() => setJumlah((j) => Math.max(1, j - 1))}
+                  className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-l-xl transition-colors"
+                >
+                  <Minus className="w-4 h-4" />
+                </button>
+                <span className="w-12 text-center font-semibold">{jumlah}</span>
+                <button
+                  onClick={() => setJumlah((j) => Math.min(product.stok, j + 1))}
+                  disabled={jumlah >= product.stok}
+                  className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-r-xl transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+              {jumlah >= product.stok && (
+                <span className="text-xs text-brand-600 font-medium">
+                  Mencapai batas stok
+                </span>
+              )}
             </div>
           </div>
 
@@ -160,6 +190,18 @@ export function ProductDetailPage({ productId }: { productId: string }) {
           </div>
         </div>
       </div>
+
+      {/* Related Products */}
+      {!relatedLoading && relatedProducts.length > 0 && (
+        <div className="border-t border-gray-100 pt-12 mt-12">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Produk Terkait</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            {relatedProducts.map((rp) => (
+              <ProductCard key={rp.id} product={rp} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

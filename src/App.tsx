@@ -12,6 +12,7 @@ import { ProductDetailPage } from './pages/ProductDetailPage';
 import { CartPage } from './pages/CartPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { AboutPage } from './pages/AboutPage';
+import { TrackingPage } from './pages/TrackingPage';
 import { AdminLoginPage } from './pages/admin/AdminLoginPage';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { Loader2 } from 'lucide-react';
@@ -54,6 +55,8 @@ function AppRoutes() {
     page = <CheckoutPage />;
   } else if (path === '/tentang') {
     page = <AboutPage />;
+  } else if (path === '/lacak') {
+    page = <TrackingPage />;
   } else {
     page = (
       <div className="max-w-3xl mx-auto px-4 py-20 text-center">

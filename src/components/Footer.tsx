@@ -24,6 +24,7 @@ export function Footer() {
               <li><Link to="/" className="hover:text-accent-400 transition-colors">Beranda</Link></li>
               <li><Link to="/produk" className="hover:text-accent-400 transition-colors">Produk</Link></li>
               <li><Link to="/tentang" className="hover:text-accent-400 transition-colors">Tentang</Link></li>
+              <li><Link to="/lacak" className="hover:text-accent-400 transition-colors">Lacak Pesanan</Link></li>
               <li><Link to="/admin" className="hover:text-accent-400 transition-colors">Admin</Link></li>
             </ul>
           </div>

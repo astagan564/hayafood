@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronLeft, MessageCircle, Loader2 } from 'lucide-react';
+import { ChevronLeft, MessageCircle, Loader2, Copy, Check } from 'lucide-react';
 import { useCart } from '../hooks/useCart';
 import { useToast } from '../hooks/useToast';
 import { supabase } from '../lib/supabase';
@@ -23,6 +23,15 @@ export function CheckoutPage() {
     items: typeof items;
     total: number;
   } | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyId = (id: string) => {
+    const cleanId = id.slice(0, 8).toUpperCase();
+    navigator.clipboard.writeText(cleanId).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,7 +121,18 @@ export function CheckoutPage() {
         </div>
         <h1 className="text-2xl font-bold text-gray-800 mb-2">Pesanan Berhasil Dibuat!</h1>
         <p className="text-gray-500 mb-1">Nomor pesanan:</p>
-        <p className="text-xl font-bold text-brand-600 mb-6">{orderId.slice(0, 8).toUpperCase()}</p>
+        <div className="inline-flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 mb-6">
+          <span className="text-xl font-bold text-brand-600 select-all tracking-wider font-mono">
+            {orderId.slice(0, 8).toUpperCase()}
+          </span>
+          <button
+            onClick={() => handleCopyId(orderId)}
+            className="p-1.5 rounded-lg hover:bg-gray-150 text-gray-500 hover:text-brand-600 transition-colors cursor-pointer"
+            title="Salin ID Pesanan"
+          >
+            {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+          </button>
+        </div>
         <p className="text-gray-600 mb-6">
           Terima kasih telah berbelanja di Hayafood! Untuk menyelesaikan pemesanan, silakan hubungi kami via WhatsApp.
         </p>
@@ -174,8 +194,8 @@ export function CheckoutPage() {
               <input
                 type="tel"
                 value={form.nomor_telepon}
-                onChange={(e) => setForm({ ...form, nomor_telepon: e.target.value })}
-                placeholder="082330903255"
+                onChange={(e) => setForm({ ...form, nomor_telepon: e.target.value.replace(/\D/g, '') })}
+                placeholder="081234567890"
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none transition-all"
                 required
               />
@@ -246,6 +266,33 @@ export function CheckoutPage() {
               <p className="text-xs text-accent-700 leading-relaxed">
                 Setelah pesanan dibuat, Anda akan diarahkan untuk konfirmasi via WhatsApp ke Hayafood untuk pembayaran dan pengiriman.
               </p>
+            </div>
+
+            {/* Payment & Shipping info */}
+            <div className="mt-4 pt-4 border-t border-gray-100 space-y-3">
+              <div>
+                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Metode Pembayaran</h4>
+                <div className="flex flex-wrap gap-1.5">
+                  {['BCA', 'Mandiri', 'BRI', 'GoPay', 'OVO', 'Dana', 'ShopeePay'].map((p) => (
+                    <span key={p} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded border border-gray-200 font-medium">
+                      {p}
+                    </span>
+                  ))}
+                  <span className="text-xs bg-brand-50 text-brand-700 border border-brand-100 px-2 py-0.5 rounded font-bold">
+                    COD (Khusus Area Jajag)
+                  </span>
+                </div>
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Kurir Pengiriman</h4>
+                <div className="flex flex-wrap gap-1.5">
+                  {['J&T', 'JNE', 'SiCepat'].map((s) => (
+                    <span key={s} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded border border-gray-200 font-medium">
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>

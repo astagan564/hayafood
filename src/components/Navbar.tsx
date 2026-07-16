@@ -12,6 +12,7 @@ export function Navbar() {
     { to: '/', label: 'Beranda' },
     { to: '/produk', label: 'Produk' },
     { to: '/tentang', label: 'Tentang' },
+    { to: '/lacak', label: 'Lacak Pesanan' },
   ];
 
   return (
