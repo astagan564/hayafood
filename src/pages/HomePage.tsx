@@ -42,6 +42,7 @@ interface InstagramEmbed {
 export function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [instagramEmbeds, setInstagramEmbeds] = useState<InstagramEmbed[]>([]);
+  const [visibleCount, setVisibleCount] = useState(3);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -61,7 +62,7 @@ export function HomePage() {
       .select('*')
       .eq('is_active', true)
       .order('created_at', { ascending: false })
-      .limit(3)
+      .limit(12)
       .then(({ data }) => {
         setInstagramEmbeds(data || []);
       });
@@ -213,9 +214,9 @@ export function HomePage() {
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-center">
-            {instagramEmbeds.map((emb) => (
-              <div key={emb.id} className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition-shadow">
-                <div className="aspect-[9/16] max-h-[420px] rounded-xl overflow-hidden bg-gray-50 border border-gray-100">
+            {instagramEmbeds.slice(0, visibleCount).map((emb) => (
+              <div key={emb.id} className="flex flex-col items-center bg-white rounded-2xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition-shadow w-full max-w-[320px] mx-auto">
+                <div className="w-full aspect-[9/16] max-h-[440px] rounded-xl overflow-hidden bg-gray-50 border border-gray-100 flex items-center justify-center">
                   <iframe
                     src={emb.embed_url}
                     className="w-full h-full"
@@ -226,13 +227,24 @@ export function HomePage() {
                   />
                 </div>
                 {emb.label && (
-                  <p className="mt-3 font-semibold text-gray-800 text-sm text-center line-clamp-1">
+                  <p className="mt-3 font-semibold text-gray-800 text-sm text-center line-clamp-1 w-full pl-1 pr-1">
                     {emb.label}
                   </p>
                 )}
               </div>
             ))}
           </div>
+
+          {instagramEmbeds.length > visibleCount && (
+            <div className="mt-10 text-center">
+              <button
+                onClick={() => setVisibleCount((prev) => prev + 3)}
+                className="inline-flex items-center justify-center bg-white border-2 border-brand-600 text-brand-600 font-semibold px-6 py-2.5 rounded-xl hover:bg-brand-50 transition-all text-sm cursor-pointer"
+              >
+                Lihat Lebih Banyak
+              </button>
+            </div>
+          )}
         </section>
       )}
  
