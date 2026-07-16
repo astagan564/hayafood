@@ -320,9 +320,6 @@ export function AdminInstagram() {
                 onDragOver={(e) => onDragOver(e, emb.id)}
                 onDrop={(e) => onDrop(e, emb.id)}
                 onDragEnd={onDragEnd}
-                onTouchStart={(e) => onTouchStart(e, emb.id)}
-                onTouchMove={onTouchMove}
-                onTouchEnd={onTouchEnd}
                 className={[
                   'bg-white rounded-2xl border-2 p-4 flex flex-col justify-between transition-all select-none',
                   isDragOver
@@ -330,13 +327,16 @@ export function AdminInstagram() {
                     : 'border-gray-100 hover:shadow-md',
                   isDragging ? 'opacity-40' : 'opacity-100',
                 ].join(' ')}
-                style={{ touchAction: 'none' }}
               >
                 {/* Drag handle + label row */}
                 <div className="flex items-center gap-2 mb-3">
                   <div
-                    className="cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 transition-colors shrink-0"
+                    className="cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 transition-colors shrink-0 p-1 -m-1 rounded"
                     title="Seret untuk mengatur urutan"
+                    onTouchStart={(e) => onTouchStart(e, emb.id)}
+                    onTouchMove={onTouchMove}
+                    onTouchEnd={onTouchEnd}
+                    style={{ touchAction: 'none' }}
                   >
                     <GripVertical className="w-5 h-5" />
                   </div>
