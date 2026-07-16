@@ -74,9 +74,10 @@ export function AdminCategories() {
         <h2 className="text-2xl font-bold text-gray-800">Kategori</h2>
         <button
           onClick={openAdd}
-          className="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold px-4 py-2 rounded-xl transition-all text-sm"
+          className="inline-flex items-center gap-1.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold px-3 py-2 sm:px-4 sm:py-2 rounded-xl transition-all text-sm shrink-0"
         >
-          <Plus className="w-4 h-4" /> Tambah Kategori
+          <Plus className="w-4 h-4" />
+          <span>Tambah<span className="hidden sm:inline"> Kategori</span></span>
         </button>
       </div>
 
