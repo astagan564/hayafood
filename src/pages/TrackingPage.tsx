@@ -54,16 +54,10 @@ export function TrackingPage() {
     setItems([]);
 
     try {
-      let query = supabase.from('orders').select('*');
-      
-      // If it's a full UUID (36 chars), use exact match. Otherwise, prefix match on text cast
-      if (queryId.length === 36) {
-        query = query.eq('id', queryId);
-      } else {
-        query = query.ilike('id', `${queryId}%`);
-      }
-
-      const { data: orderData, error: orderError } = await query.maybeSingle();
+      // Call Postgres RPC function to search order by text cast prefix of UUID id column
+      const { data: orderData, error: orderError } = await supabase
+        .rpc('search_order_by_id_prefix', { prefix: queryId })
+        .maybeSingle();
 
       if (orderError) throw orderError;
 
@@ -72,13 +66,14 @@ export function TrackingPage() {
         return;
       }
 
-      setOrder(orderData);
+      const typedOrder = orderData as unknown as OrderDetail;
+      setOrder(typedOrder);
 
       // Fetch order items
       const { data: itemsData, error: itemsError } = await supabase
         .from('order_items')
         .select('*')
-        .eq('order_id', orderData.id);
+        .eq('order_id', typedOrder.id);
 
       if (itemsError) throw itemsError;
       setItems(itemsData || []);
