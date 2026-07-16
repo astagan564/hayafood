@@ -65,8 +65,12 @@ export function HomePage() {
             </div>
             <div className="hidden md:flex justify-center">
               <div className="relative">
-                <div className="w-80 h-80 rounded-full bg-gradient-to-br from-accent-400 to-accent-600 flex items-center justify-center shadow-2xl">
-                  <BrandFlame className="w-40 h-40 text-white" />
+                <div className="w-80 h-80 rounded-full bg-gradient-to-br from-accent-400 to-accent-600 overflow-hidden flex items-center justify-center shadow-2xl">
+                  <img
+                    src="https://tzzdbbdqxrvjyupigowq.supabase.co/storage/v1/object/public/product-images/Screenshot%20From%202026-07-16%2019-46-00.png"
+                    alt="Produk HayaFood"
+                    className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
+                  />
                 </div>
                 <div className="absolute -top-4 -right-4 bg-white rounded-2xl shadow-xl px-4 py-3 animate-fade-in">
                   <div className="text-2xl font-bold text-brand-600">100%</div>
