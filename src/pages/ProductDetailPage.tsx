@@ -116,7 +116,7 @@ export function ProductDetailPage({ productId }: { productId: string }) {
 
           <div className="border-t border-gray-100 pt-4 mb-6">
             <h3 className="font-semibold text-gray-800 mb-2">Deskripsi</h3>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-gray-600 leading-relaxed whitespace-pre-line">
               {product.deskripsi || 'Kripik renyah berkualitas dari Hayafood'}
             </p>
           </div>
