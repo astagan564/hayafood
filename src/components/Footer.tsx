@@ -10,7 +10,7 @@ export function Footer() {
           {/* Brand */}
           <div>
             <div className="flex items-center mb-4">
-              <Logo className="h-10 w-auto" textColor="#ffffff" />
+              <Logo className="h-16 w-auto" textColor="#ffffff" />
             </div>
             <p className="text-sm text-gray-400 leading-relaxed">
               Kripik renyah berkualitas dari bahan pilihan. Camilan favorit untuk segala suasana.

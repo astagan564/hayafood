@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Flame, Truck, ShieldCheck, Sparkles, ArrowRight } from 'lucide-react';
+import { Truck, ShieldCheck, Sparkles, ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { Product } from '../types';
 import { ProductCard, ProductCardSkeleton } from '../components/ProductCard';
 import { Link } from '../lib/router';
+import { BrandFlame } from '../components/Logo';
 
 export function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -65,7 +66,7 @@ export function HomePage() {
             <div className="hidden md:flex justify-center">
               <div className="relative">
                 <div className="w-80 h-80 rounded-full bg-gradient-to-br from-accent-400 to-accent-600 flex items-center justify-center shadow-2xl">
-                  <Flame className="w-40 h-40 text-white" />
+                  <BrandFlame className="w-40 h-40 text-white" />
                 </div>
                 <div className="absolute -top-4 -right-4 bg-white rounded-2xl shadow-xl px-4 py-3 animate-fade-in">
                   <div className="text-2xl font-bold text-brand-600">100%</div>
@@ -85,7 +86,7 @@ export function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { icon: Flame, title: 'Renyah & Gurih', desc: 'Dibuat dari bahan pilihan dengan resep khusus untuk rasa terbaik.' },
+            { icon: BrandFlame, title: 'Renyah & Gurih', desc: 'Dibuat dari bahan pilihan dengan resep khusus untuk rasa terbaik.' },
             { icon: Truck, title: 'Pengiriman Cepat', desc: 'Pesanan dikirim ke seluruh Indonesia dengan packaging aman.' },
             { icon: ShieldCheck, title: 'Kualitas Terjamin', desc: 'Produksi bersih dan higienis, kualitas terjaga di setiap batch.' },
           ].map((f) => (
