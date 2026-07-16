@@ -1,4 +1,5 @@
-import { Flame, Heart, Target, Users, Award } from 'lucide-react';
+import { Heart, Target, Users, Award } from 'lucide-react';
+import { BrandFlame } from '../components/Logo';
 
 export function AboutPage() {
   return (
@@ -6,7 +7,7 @@ export function AboutPage() {
       {/* Hero */}
       <div className="text-center mb-12">
         <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-brand-600 to-accent-500 flex items-center justify-center mb-4">
-          <Flame className="w-8 h-8 text-white" />
+          <BrandFlame className="w-8 h-8" textColor="#ffffff" />
         </div>
         <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">Tentang Hayafood</h1>
         <p className="text-lg text-gray-500 max-w-2xl mx-auto">

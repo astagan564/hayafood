@@ -35,15 +35,15 @@ export function Footer() {
             <ul className="space-y-3 text-sm">
               <li className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-accent-400 shrink-0" />
-                <span>+62 82-330-903-255</span>
+                <span>+62 823-3090-3255</span>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-accent-400 shrink-0" />
-                <span>hello@hayafood.id</span>
+                <span>hayafood.id@gmail.com</span>
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-accent-400 shrink-0 mt-0.5" />
-                <span>Banyuwangi, Indonesia</span>
+                <span>Jl. Ceplukan, Dsn. Sere, Desa Bangorejo, Kecamatan Bangorejo, Kabupaten Banyuwangi, Jawa Timur 68487, Indonesia</span>
               </li>
             </ul>
             <div className="flex gap-3 mt-4">

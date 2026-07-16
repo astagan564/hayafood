@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Flame, Lock, Mail, Loader2, ArrowLeft } from 'lucide-react';
+import { Lock, Mail, Loader2, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../hooks/useToast';
 import { Link, navigate } from '../../lib/router';
+import { BrandFlame } from '../../components/Logo';
 
 export function AdminLoginPage() {
   const { signIn } = useAuth();
@@ -34,7 +35,7 @@ export function AdminLoginPage() {
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
           <div className="text-center mb-6">
             <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-brand-600 to-accent-500 flex items-center justify-center mb-3">
-              <Flame className="w-7 h-7 text-white" />
+              <BrandFlame className="w-7 h-7" textColor="#ffffff" />
             </div>
             <h1 className="text-2xl font-bold text-gray-800">Admin Login</h1>
             <p className="text-sm text-gray-500 mt-1">Masuk untuk mengelola Hayafood</p>
