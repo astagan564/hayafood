@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Flame, LayoutDashboard, Package, Tag, ShoppingCart, LogOut, Menu, X } from 'lucide-react';
+import { Flame, LayoutDashboard, Package, Tag, ShoppingCart, LogOut, Menu, X, Plus } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../hooks/useToast';
 import { Link, navigate } from '../../lib/router';
@@ -35,9 +35,9 @@ export function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar - Desktop */}
-      <aside className="hidden md:flex flex-col w-60 bg-white border-r border-gray-100 sticky top-16 h-[calc(100vh-4rem)]">
+      <aside className="hidden md:flex flex-col w-60 bg-white border-r border-gray-100 sticky top-0 h-screen">
         <div className="p-4 flex-1">
           <nav className="space-y-1">
             {menuItems.map((item) => (
@@ -79,7 +79,7 @@ export function AdminDashboard() {
         <div className="md:hidden fixed inset-0 z-40 bg-black/50" onClick={() => setSidebarOpen(false)} />
       )}
       <aside
-        className={`md:hidden fixed top-16 left-0 z-40 w-60 bg-white border-r border-gray-100 h-[calc(100vh-4rem)] transition-transform ${
+        className={`md:hidden fixed top-0 left-0 z-40 w-60 bg-white border-r border-gray-100 h-screen transition-transform ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -112,13 +112,25 @@ export function AdminDashboard() {
       {/* Main content */}
       <div className="flex-1 min-w-0">
         {/* Mobile header */}
-        <div className="md:hidden bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3 sticky top-16 z-30">
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded-lg hover:bg-gray-100">
-            {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
-          <span className="font-semibold text-gray-800">
-            {menuItems.find((m) => m.id === tab)?.label}
-          </span>
+        <div className="md:hidden bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded-lg hover:bg-gray-100">
+              {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+            <span className="font-semibold text-gray-800">
+              {menuItems.find((m) => m.id === tab)?.label}
+            </span>
+          </div>
+          {/* Add button on mobile header for products and categories */}
+          {['products', 'categories'].includes(tab) && (
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('admin-add-item'))}
+              className="p-1.5 rounded-lg hover:bg-brand-50 text-brand-600 transition-colors"
+              aria-label="Tambah Baru"
+            >
+              <Plus className="w-5 h-5" />
+            </button>
+          )}
         </div>
 
         <div className="p-4 sm:p-6 lg:p-8">

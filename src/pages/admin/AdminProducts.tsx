@@ -49,7 +49,12 @@ export function AdminProducts() {
     });
   };
 
-  useEffect(fetchData, []);
+  useEffect(() => {
+    fetchData();
+    const handleAdd = () => openAdd();
+    window.addEventListener('admin-add-item', handleAdd);
+    return () => window.removeEventListener('admin-add-item', handleAdd);
+  }, []);
 
   const openAdd = () => {
     setForm(emptyForm);
@@ -140,7 +145,7 @@ export function AdminProducts() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="hidden md:flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-800">Produk</h2>
         <button
           onClick={openAdd}
