@@ -1,5 +1,6 @@
-import { Flame, Mail, Phone, MapPin, Instagram, Facebook } from 'lucide-react';
+import { Mail, Phone, MapPin, Instagram, Facebook } from 'lucide-react';
 import { Link } from '../lib/router';
+import { Logo } from './Logo';
 
 export function Footer() {
   return (
@@ -8,13 +9,8 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand */}
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-600 to-accent-500 flex items-center justify-center">
-                <Flame className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-extrabold text-white">
-                Haya<span className="text-accent-400">food</span>
-              </span>
+            <div className="flex items-center mb-4">
+              <Logo className="h-10 w-auto" textColor="#ffffff" />
             </div>
             <p className="text-sm text-gray-400 leading-relaxed">
               Kripik renyah berkualitas dari bahan pilihan. Camilan favorit untuk segala suasana.

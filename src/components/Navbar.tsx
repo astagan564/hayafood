@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Menu, X, ShoppingCart, Flame } from 'lucide-react';
+import { Menu, X, ShoppingCart } from 'lucide-react';
 import { Link, navigate } from '../lib/router';
 import { useCart } from '../hooks/useCart';
+import { Logo } from './Logo';
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -18,13 +19,8 @@ export function Navbar() {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 shrink-0">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-600 to-accent-500 flex items-center justify-center">
-              <Flame className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-extrabold text-brand-700 tracking-tight">
-              Haya<span className="text-accent-500">food</span>
-            </span>
+          <Link to="/" className="flex items-center shrink-0">
+            <Logo className="h-10 w-auto" textColor="#111827" />
           </Link>
 
           {/* Desktop nav */}
