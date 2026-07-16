@@ -59,15 +59,25 @@ export function CheckoutPage() {
       }));
  
       const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
-      if (itemsError) throw itemsError;
+      if (itemsError) {
+        // Rollback: delete the created order if items insertion fails
+        await supabase.from('orders').delete().eq('id', order.id);
+        throw itemsError;
+      }
  
       // Save items and total before clearing the cart
       setCompletedOrder({ items: [...items], total: totalPrice });
       setOrderId(order.id);
       clearCart();
       show('Pesanan berhasil dibuat!');
-    } catch {
-      show('Gagal membuat pesanan. Silakan coba lagi.', 'error');
+    } catch (err) {
+      let errMsg = 'Gagal membuat pesanan. Silakan coba lagi.';
+      if (err instanceof Error) {
+        errMsg = err.message;
+      } else if (err && typeof err === 'object' && 'message' in err) {
+        errMsg = String((err as { message: unknown }).message);
+      }
+      show(errMsg, 'error');
     } finally {
       setSubmitting(false);
     }
