@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../hooks/useToast';
-import { Plus, Trash2, X, Loader2, Video, ExternalLink } from 'lucide-react';
+import { Plus, Trash2, X, Loader2, Video, ExternalLink, GripVertical } from 'lucide-react';
 
 interface InstagramEmbed {
   id: string;
@@ -9,6 +9,7 @@ interface InstagramEmbed {
   embed_url: string;
   label: string | null;
   is_active: boolean;
+  position: number;
   created_at: string;
 }
 
@@ -20,13 +21,23 @@ export function AdminInstagram() {
   const [postUrl, setPostUrl] = useState('');
   const [label, setLabel] = useState('');
   const [saving, setSaving] = useState(false);
+  const [savingOrder, setSavingOrder] = useState(false);
+
+  // Drag state (desktop)
+  const dragIdRef = useRef<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
+
+  // Touch state (mobile)
+  const touchIdRef = useRef<string | null>(null);
+  const touchOverIdRef = useRef<string | null>(null);
+  const [touchOverId, setTouchOverId] = useState<string | null>(null);
 
   const fetchEmbeds = () => {
     setLoading(true);
     supabase
       .from('instagram_embeds')
       .select('*')
-      .order('created_at', { ascending: false })
+      .order('position', { ascending: true })
       .then(({ data }) => {
         setEmbeds(data || []);
         setLoading(false);
@@ -51,13 +62,9 @@ export function AdminInstagram() {
       const trimmed = url.trim();
       if (!trimmed) return null;
       const parsed = new URL(trimmed);
-      const pathname = parsed.pathname;
-      const parts = pathname.split('/').filter(Boolean);
-      
-      const filteredParts = parts.filter((p) => p !== 'embed');
-      
-      if (filteredParts.length >= 2 && (filteredParts[0] === 'p' || filteredParts[0] === 'reel')) {
-        return `https://www.instagram.com/${filteredParts[0]}/${filteredParts[1]}/embed`;
+      const parts = parsed.pathname.split('/').filter((p) => p !== 'embed' && p !== '');
+      if (parts.length >= 2 && (parts[0] === 'p' || parts[0] === 'reel')) {
+        return `https://www.instagram.com/${parts[0]}/${parts[1]}/embed`;
       }
       return null;
     } catch {
@@ -68,21 +75,20 @@ export function AdminInstagram() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!postUrl.trim()) return;
-
     const embedUrl = getInstagramEmbedUrl(postUrl);
     if (!embedUrl) {
-      show('Format URL Instagram tidak valid. Pastikan link berisi /p/ atau /reel/', 'error');
+      show('Format URL tidak valid. Pastikan link berisi /p/ atau /reel/', 'error');
       return;
     }
-
     setSaving(true);
+    const nextPos = embeds.length;
     const { error } = await supabase.from('instagram_embeds').insert({
       post_url: postUrl.trim(),
       embed_url: embedUrl,
       label: label.trim() || null,
       is_active: true,
+      position: nextPos,
     });
-
     setSaving(false);
     if (error) {
       show('Gagal menambahkan video', 'error');
@@ -106,9 +112,95 @@ export function AdminInstagram() {
     }
   };
 
+  // --- Reorder helpers ---
+
+  const reorderAndSave = async (fromId: string, toId: string) => {
+    if (fromId === toId) return;
+    const fromIdx = embeds.findIndex((e) => e.id === fromId);
+    const toIdx = embeds.findIndex((e) => e.id === toId);
+    if (fromIdx === -1 || toIdx === -1) return;
+
+    // Build new ordered array
+    const reordered = [...embeds];
+    const [moved] = reordered.splice(fromIdx, 1);
+    reordered.splice(toIdx, 0, moved);
+
+    // Optimistic UI update
+    setEmbeds(reordered);
+
+    // Save new positions to DB
+    setSavingOrder(true);
+    const updates = reordered.map((emb, idx) =>
+      supabase.from('instagram_embeds').update({ position: idx }).eq('id', emb.id)
+    );
+    const results = await Promise.all(updates);
+    setSavingOrder(false);
+
+    const hasError = results.some((r) => r.error);
+    if (hasError) {
+      show('Gagal menyimpan urutan, memuat ulang…', 'error');
+      fetchEmbeds();
+    } else {
+      show('Urutan berhasil disimpan ✓');
+    }
+  };
+
+  // --- Desktop Drag & Drop ---
+
+  const onDragStart = (id: string) => {
+    dragIdRef.current = id;
+  };
+
+  const onDragOver = (e: React.DragEvent, id: string) => {
+    e.preventDefault();
+    setDragOverId(id);
+  };
+
+  const onDrop = (e: React.DragEvent, toId: string) => {
+    e.preventDefault();
+    const fromId = dragIdRef.current;
+    dragIdRef.current = null;
+    setDragOverId(null);
+    if (fromId) reorderAndSave(fromId, toId);
+  };
+
+  const onDragEnd = () => {
+    dragIdRef.current = null;
+    setDragOverId(null);
+  };
+
+  // --- Mobile Touch ---
+
+  const onTouchStart = (_e: React.TouchEvent, id: string) => {
+    touchIdRef.current = id;
+    touchOverIdRef.current = id;
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    // Find the element currently under the touch point
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    const card = el?.closest('[data-embed-id]') as HTMLElement | null;
+    const overId = card?.dataset.embedId ?? null;
+    touchOverIdRef.current = overId;
+    setTouchOverId(overId);
+  };
+
+  const onTouchEnd = () => {
+    const fromId = touchIdRef.current;
+    const toId = touchOverIdRef.current;
+    touchIdRef.current = null;
+    touchOverIdRef.current = null;
+    setTouchOverId(null);
+    if (fromId && toId && fromId !== toId) {
+      reorderAndSave(fromId, toId);
+    }
+  };
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-2">
         <h2 className="text-2xl font-bold text-gray-800">Manajemen Video Instagram</h2>
         {!showForm && (
           <button
@@ -120,6 +212,20 @@ export function AdminInstagram() {
         )}
       </div>
 
+      {/* Hint text */}
+      {embeds.length > 1 && (
+        <p className="text-xs text-gray-400 mb-5 flex items-center gap-1.5">
+          <GripVertical className="w-3.5 h-3.5 shrink-0" />
+          Seret kartu untuk mengubah urutan tampilan. Urutan tersimpan otomatis setelah dilepas.
+          {savingOrder && (
+            <span className="inline-flex items-center gap-1 text-brand-600">
+              <Loader2 className="w-3 h-3 animate-spin" /> Menyimpan…
+            </span>
+          )}
+        </p>
+      )}
+
+      {/* Add Form */}
       {showForm && (
         <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
           <div className="flex justify-between items-center mb-4">
@@ -152,7 +258,7 @@ export function AdminInstagram() {
                 type="url"
                 value={postUrl}
                 onChange={(e) => setPostUrl(e.target.value)}
-                placeholder="https://www.instagram.com/reel/C_XyZ123/ atau https://www.instagram.com/p/C_XyZ123/"
+                placeholder="https://www.instagram.com/reel/C_XyZ123/"
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none transition-all text-sm"
                 required
               />
@@ -186,10 +292,11 @@ export function AdminInstagram() {
         </div>
       )}
 
+      {/* Grid */}
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-64 bg-gray-150 rounded-2xl animate-pulse" />
+            <div key={i} className="h-64 bg-gray-100 rounded-2xl animate-pulse" />
           ))}
         </div>
       ) : embeds.length === 0 ? (
@@ -201,13 +308,45 @@ export function AdminInstagram() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {embeds.map((emb) => (
-            <div
-              key={emb.id}
-              className="bg-white rounded-2xl border border-gray-150 p-4 flex flex-col justify-between hover:shadow-md transition-all group"
-            >
-              <div>
-                <div className="aspect-[9/16] max-h-[360px] w-full rounded-xl overflow-hidden bg-gray-50 border border-gray-100 mb-3 relative">
+          {embeds.map((emb) => {
+            const isDragOver = dragOverId === emb.id || touchOverId === emb.id;
+            const isDragging = dragIdRef.current === emb.id;
+            return (
+              <div
+                key={emb.id}
+                data-embed-id={emb.id}
+                draggable
+                onDragStart={() => onDragStart(emb.id)}
+                onDragOver={(e) => onDragOver(e, emb.id)}
+                onDrop={(e) => onDrop(e, emb.id)}
+                onDragEnd={onDragEnd}
+                onTouchStart={(e) => onTouchStart(e, emb.id)}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+                className={[
+                  'bg-white rounded-2xl border-2 p-4 flex flex-col justify-between transition-all select-none',
+                  isDragOver
+                    ? 'border-brand-500 shadow-lg scale-[1.02] ring-2 ring-brand-200'
+                    : 'border-gray-100 hover:shadow-md',
+                  isDragging ? 'opacity-40' : 'opacity-100',
+                ].join(' ')}
+                style={{ touchAction: 'none' }}
+              >
+                {/* Drag handle + label row */}
+                <div className="flex items-center gap-2 mb-3">
+                  <div
+                    className="cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 transition-colors shrink-0"
+                    title="Seret untuk mengatur urutan"
+                  >
+                    <GripVertical className="w-5 h-5" />
+                  </div>
+                  <h4 className="font-bold text-gray-800 text-sm line-clamp-1 flex-1">
+                    {emb.label || 'Tanpa Label'}
+                  </h4>
+                </div>
+
+                {/* Iframe preview */}
+                <div className="aspect-[9/16] max-h-[300px] w-full rounded-xl overflow-hidden bg-gray-50 border border-gray-100 mb-3 pointer-events-none">
                   <iframe
                     src={emb.embed_url}
                     className="w-full h-full"
@@ -215,33 +354,32 @@ export function AdminInstagram() {
                     scrolling="no"
                     allowFullScreen
                     title={emb.label || 'Instagram Embed'}
+                    tabIndex={-1}
                   />
                 </div>
-                <h4 className="font-bold text-gray-800 text-sm line-clamp-1 mb-1">
-                  {emb.label || 'Tanpa Label'}
-                </h4>
-                <p className="text-xs text-gray-400 line-clamp-1 flex items-center gap-1">
+
+                {/* Footer row */}
+                <div className="border-t border-gray-100 pt-3 flex items-center justify-between">
                   <a
                     href={emb.post_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:underline flex items-center gap-0.5 text-brand-600 font-medium"
+                    className="inline-flex items-center gap-1 text-xs text-brand-600 hover:underline font-medium"
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    Buka di Instagram <ExternalLink className="w-3 h-3" />
+                    Buka Instagram <ExternalLink className="w-3 h-3" />
                   </a>
-                </p>
+                  <button
+                    onClick={() => handleDelete(emb.id)}
+                    className="inline-flex items-center gap-1 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 font-semibold px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer"
+                    title="Hapus Video"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" /> Hapus
+                  </button>
+                </div>
               </div>
-              <div className="border-t border-gray-100 pt-3 mt-3 flex justify-end">
-                <button
-                  onClick={() => handleDelete(emb.id)}
-                  className="inline-flex items-center gap-1 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 font-semibold px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer"
-                  title="Hapus Video"
-                >
-                  <Trash2 className="w-3.5 h-3.5" /> Hapus
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

@@ -61,7 +61,7 @@ export function HomePage() {
       .from('instagram_embeds')
       .select('*')
       .eq('is_active', true)
-      .order('created_at', { ascending: false })
+      .order('position', { ascending: true })
       .limit(12)
       .then(({ data }) => {
         setInstagramEmbeds(data || []);
