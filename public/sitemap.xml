@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  sitemap.xml — HayaFood
+  Ganti https://www.hayafood.com dengan domain produksi kamu.
+  Perbarui <lastmod> setelah setiap deploy besar.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- Beranda -->
+  <url>
+    <loc>https://www.hayafood.com/</loc>
+    <lastmod>2026-07-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Katalog Produk -->
+  <url>
+    <loc>https://www.hayafood.com/produk</loc>
+    <lastmod>2026-07-16</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Tentang Kami -->
+  <url>
+    <loc>https://www.hayafood.com/tentang</loc>
+    <lastmod>2026-07-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!--
+    Catatan: Halaman produk detail (/produk/:id) dan halaman transaksi
+    (/keranjang, /checkout) tidak dimasukkan ke sitemap.
+    - Halaman produk detail: tambahkan secara dinamis saat generate sitemap
+      (misalnya dengan script yang fetch dari Supabase)
+    - Halaman transaksi: tidak perlu diindex oleh search engine
+  -->
+
+</urlset>

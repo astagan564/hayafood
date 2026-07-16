@@ -1,0 +1,17 @@
+# robots.txt — HayaFood
+# Ganti https://www.hayafood.com dengan domain produksi kamu
+
+User-agent: *
+Allow: /
+Allow: /produk
+Allow: /tentang
+
+# Blokir halaman admin dari crawler
+Disallow: /admin
+Disallow: /admin/
+
+# Blokir halaman transaksi (tidak perlu diindex)
+Disallow: /keranjang
+Disallow: /checkout
+
+Sitemap: https://www.hayafood.com/sitemap.xml
