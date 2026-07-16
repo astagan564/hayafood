@@ -1,10 +1,37 @@
 import { useEffect, useState } from 'react';
-import { Truck, ShieldCheck, Sparkles, ArrowRight } from 'lucide-react';
+import { Truck, ShieldCheck, Sparkles, ArrowRight, Star } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { Product } from '../types';
 import { ProductCard, ProductCardSkeleton } from '../components/ProductCard';
 import { Link } from '../lib/router';
 import { BrandFlame } from '../components/Logo';
+
+const testimonials = [
+  {
+    nama: 'Budi Santoso',
+    kota: 'Surabaya',
+    ulasan: 'Kripiknya renyah banget dan bumbunya pas di lidah. Kemasannya aman, tidak hancur pas sampai!',
+    rating: 5,
+    inisial: 'BS',
+    warnaBg: 'bg-brand-50 text-brand-600',
+  },
+  {
+    nama: 'Siti Aminah',
+    kota: 'Malang',
+    ulasan: 'Kripik Pentolnya juara! Nagih banget buat camilan sambil kerja. Sangat merekomendasikan Hayafood!',
+    rating: 5,
+    inisial: 'SA',
+    warnaBg: 'bg-accent-100 text-accent-700',
+  },
+  {
+    nama: 'Nur Imamah',
+    kota: 'Banyuwangi',
+    ulasan: 'Respons penjual cepat dan ramah sekali. Pengiriman cepat dan kripik rasanya premium dengan harga terjangkau, setiap lebaran pasti selalu beli di Hayafood.',
+    rating: 5,
+    inisial: 'NI',
+    warnaBg: 'bg-blue-50 text-blue-600',
+  },
+];
 
 export function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -119,7 +146,43 @@ export function HomePage() {
             : products.map((p) => <ProductCard key={p.id} product={p} />)}
         </div>
       </section>
-
+ 
+      {/* Testimonials */}
+      <section className="bg-white py-16 border-t border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-xl mx-auto mb-12">
+            <h2 className="text-3xl font-bold text-gray-800 mb-2">Apa Kata Mereka?</h2>
+            <p className="text-gray-500 text-sm">Testimoni jujur dari pelanggan setia camilan Hayafood</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {testimonials.map((t, idx) => (
+              <div key={idx} className="bg-gray-50 rounded-2xl border border-gray-100 p-6 flex flex-col justify-between hover:shadow-md transition-shadow">
+                <div>
+                  <div className="flex gap-1 mb-4 text-amber-400">
+                    {Array.from({ length: t.rating }).map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-current" />
+                    ))}
+                  </div>
+                  <p className="text-gray-600 text-sm italic leading-relaxed mb-6">
+                    "{t.ulasan}"
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-full font-bold flex items-center justify-center shrink-0 text-sm ${t.warnaBg}`}>
+                    {t.inisial}
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-800 text-sm">{t.nama}</h4>
+                    <p className="text-xs text-gray-400">{t.kota}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+ 
       {/* CTA */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-gradient-to-r from-accent-400 to-accent-500 rounded-3xl p-8 md:p-12 text-center">
