@@ -19,17 +19,21 @@ export function CheckoutPage() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
-
+  const [completedOrder, setCompletedOrder] = useState<{
+    items: typeof items;
+    total: number;
+  } | null>(null);
+ 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+ 
     if (!form.nama_pembeli.trim() || !form.nomor_telepon.trim() || !form.alamat.trim()) {
       show('Mohon lengkapi semua data wajib', 'error');
       return;
     }
-
+ 
     setSubmitting(true);
-
+ 
     try {
       const { data: order, error: orderError } = await supabase
         .from('orders')
@@ -43,9 +47,9 @@ export function CheckoutPage() {
         })
         .select()
         .single();
-
+ 
       if (orderError) throw orderError;
-
+ 
       const orderItems = items.map((item) => ({
         order_id: order.id,
         product_id: item.product.id,
@@ -53,10 +57,12 @@ export function CheckoutPage() {
         jumlah: item.jumlah,
         harga_satuan: item.product.harga,
       }));
-
+ 
       const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
       if (itemsError) throw itemsError;
-
+ 
+      // Save items and total before clearing the cart
+      setCompletedOrder({ items: [...items], total: totalPrice });
       setOrderId(order.id);
       clearCart();
       show('Pesanan berhasil dibuat!');
@@ -66,20 +72,21 @@ export function CheckoutPage() {
       setSubmitting(false);
     }
   };
-
+ 
   const handleWhatsApp = () => {
+    const orderData = completedOrder || { items, total: totalPrice };
     let message = `Halo Hayafood! Saya ingin memesan kripik.\n\n`;
     message += `Nama: ${form.nama_pembeli}\n`;
     message += `No. Telepon: ${form.nomor_telepon}\n`;
     message += `Alamat: ${form.alamat}\n`;
     if (form.catatan) message += `Catatan: ${form.catatan}\n`;
     message += `\nDaftar Pesanan:\n`;
-    items.forEach((item, i) => {
+    orderData.items.forEach((item, i) => {
       message += `${i + 1}. ${item.product.nama} x${item.jumlah} - ${formatRupiah(item.product.harga * item.jumlah)}\n`;
     });
-    message += `\nTotal: ${formatRupiah(totalPrice)}\n`;
+    message += `\nTotal: ${formatRupiah(orderData.total)}\n`;
     if (orderId) message += `\nNo. Pesanan: ${orderId.slice(0, 8).toUpperCase()}`;
-
+ 
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   };
