@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Flame, LayoutDashboard, Package, Tag, ShoppingCart, LogOut, Menu, X, Plus } from 'lucide-react';
+import { Flame, LayoutDashboard, Package, Tag, ShoppingCart, LogOut, Menu, X, Plus, Video } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../hooks/useToast';
 import { Link, navigate } from '../../lib/router';
@@ -7,8 +7,9 @@ import { AdminOverview } from './AdminOverview';
 import { AdminProducts } from './AdminProducts';
 import { AdminCategories } from './AdminCategories';
 import { AdminOrders } from './AdminOrders';
+import { AdminInstagram } from './AdminInstagram';
 
-type Tab = 'overview' | 'products' | 'categories' | 'orders';
+type Tab = 'overview' | 'products' | 'categories' | 'orders' | 'instagram';
 
 export function AdminDashboard() {
   const { signOut } = useAuth();
@@ -21,6 +22,7 @@ export function AdminDashboard() {
     { id: 'products', label: 'Produk', icon: Package },
     { id: 'categories', label: 'Kategori', icon: Tag },
     { id: 'orders', label: 'Pesanan', icon: ShoppingCart },
+    { id: 'instagram', label: 'Video Instagram', icon: Video },
   ];
 
   const handleSignOut = async () => {
@@ -138,6 +140,7 @@ export function AdminDashboard() {
           {tab === 'products' && <AdminProducts />}
           {tab === 'categories' && <AdminCategories />}
           {tab === 'orders' && <AdminOrders />}
+          {tab === 'instagram' && <AdminInstagram />}
         </div>
       </div>
     </div>

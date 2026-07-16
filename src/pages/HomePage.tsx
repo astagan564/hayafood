@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Truck, ShieldCheck, Sparkles, ArrowRight, Star } from 'lucide-react';
+import { Truck, ShieldCheck, Sparkles, ArrowRight, Star, Instagram } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { Product } from '../types';
 import { ProductCard, ProductCardSkeleton } from '../components/ProductCard';
@@ -33,8 +33,15 @@ const testimonials = [
   },
 ];
 
+interface InstagramEmbed {
+  id: string;
+  embed_url: string;
+  label: string | null;
+}
+
 export function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [instagramEmbeds, setInstagramEmbeds] = useState<InstagramEmbed[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -47,6 +54,16 @@ export function HomePage() {
       .then(({ data }) => {
         setProducts(data || []);
         setLoading(false);
+      });
+
+    supabase
+      .from('instagram_embeds')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(3)
+      .then(({ data }) => {
+        setInstagramEmbeds(data || []);
       });
   }, []);
 
@@ -182,6 +199,42 @@ export function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Instagram Videos */}
+      {instagramEmbeds.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="text-center max-w-xl mx-auto mb-12">
+            <div className="inline-flex items-center gap-2 bg-brand-50 text-brand-600 rounded-full px-4 py-1.5 mb-4">
+              <Instagram className="w-4 h-4" />
+              <span className="text-sm font-semibold">Hayafood di Instagram</span>
+            </div>
+            <h2 className="text-3xl font-bold text-gray-800 mb-2">Keseruan & Testimoni</h2>
+            <p className="text-gray-500 text-sm">Lihat keseruan promosi dan testimoni renyah kami di Instagram</p>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-center">
+            {instagramEmbeds.map((emb) => (
+              <div key={emb.id} className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition-shadow">
+                <div className="aspect-[9/16] max-h-[420px] rounded-xl overflow-hidden bg-gray-50 border border-gray-100">
+                  <iframe
+                    src={emb.embed_url}
+                    className="w-full h-full"
+                    frameBorder="0"
+                    scrolling="no"
+                    allowFullScreen
+                    title={emb.label || 'Instagram Embed'}
+                  />
+                </div>
+                {emb.label && (
+                  <p className="mt-3 font-semibold text-gray-800 text-sm text-center line-clamp-1">
+                    {emb.label}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
  
       {/* CTA */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
