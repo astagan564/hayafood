@@ -1,21 +1,33 @@
+import { Suspense, lazy } from 'react';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { Link } from './lib/router';
 import { useRouter } from './hooks/useRouter';
 import { useAuth } from './hooks/useAuth';
-import { HomePage } from './pages/HomePage';
-import { CatalogPage } from './pages/CatalogPage';
-import { ProductDetailPage } from './pages/ProductDetailPage';
-import { CartPage } from './pages/CartPage';
-import { CheckoutPage } from './pages/CheckoutPage';
-import { AboutPage } from './pages/AboutPage';
-import { TrackingPage } from './pages/TrackingPage';
-import { AdminLoginPage } from './pages/admin/AdminLoginPage';
-import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { Loader2 } from 'lucide-react';
+
+// Page-level lazy imports — each page is loaded only when navigated to
+const HomePage = lazy(() => import('./pages/HomePage').then((m) => ({ default: m.HomePage })));
+const CatalogPage = lazy(() => import('./pages/CatalogPage').then((m) => ({ default: m.CatalogPage })));
+const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage').then((m) => ({ default: m.ProductDetailPage })));
+const CartPage = lazy(() => import('./pages/CartPage').then((m) => ({ default: m.CartPage })));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage').then((m) => ({ default: m.CheckoutPage })));
+const AboutPage = lazy(() => import('./pages/AboutPage').then((m) => ({ default: m.AboutPage })));
+const TrackingPage = lazy(() => import('./pages/TrackingPage').then((m) => ({ default: m.TrackingPage })));
+const AdminLoginPage = lazy(() => import('./pages/admin/AdminLoginPage').then((m) => ({ default: m.AdminLoginPage })));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then((m) => ({ default: m.AdminDashboard })));
+
+function PageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#FAF8F5] dark:bg-[#090D16]">
+      <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+    </div>
+  );
+}
 
 function AppRoutes() {
   const path = useRouter();
@@ -23,18 +35,8 @@ function AppRoutes() {
 
   // Admin routes
   if (path.startsWith('/admin')) {
-    if (loading) {
-      return (
-        <div className="min-h-screen flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-brand-600" />
-        </div>
-      );
-    }
-    if (path === '/admin' || path === '/admin/') {
-      if (session) return <AdminDashboard />;
-      return <AdminLoginPage />;
-    }
-    if (path === '/admin/dashboard') {
+    if (loading) return <PageLoader />;
+    if (path === '/admin' || path === '/admin/' || path === '/admin/dashboard') {
       if (session) return <AdminDashboard />;
       return <AdminLoginPage />;
     }
@@ -42,8 +44,9 @@ function AppRoutes() {
   }
 
   // Storefront routes
+  const isHomePage = path === '/' || path === '';
   let page: React.ReactNode;
-  if (path === '/' || path === '') {
+  if (isHomePage) {
     page = <HomePage />;
   } else if (path === '/produk') {
     page = <CatalogPage />;
@@ -60,9 +63,9 @@ function AppRoutes() {
   } else {
     page = (
       <div className="max-w-3xl mx-auto px-4 py-20 text-center">
-        <h1 className="text-4xl font-bold text-gray-300 mb-4">404</h1>
-        <p className="text-gray-500 mb-6">Maaf sepertinya anda salah jalan</p>
-        <Link to="/" className="text-brand-600 font-medium hover:underline">
+        <h1 className="text-4xl font-black text-gray-950 dark:text-white mb-4">404</h1>
+        <p className="text-gray-700 dark:text-gray-300 font-semibold mb-6">Maaf sepertinya Anda salah jalan</p>
+        <Link to="/" className="text-amber-500 font-bold hover:underline">
           Kembali ke beranda
         </Link>
       </div>
@@ -70,9 +73,13 @@ function AppRoutes() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-[#FAF8F5] dark:bg-[#090D16] text-gray-900 dark:text-gray-100 transition-colors duration-300">
       <Navbar />
-      <main className="flex-1">{page}</main>
+      <main className={`flex-1 ${isHomePage ? '' : 'pt-16 sm:pt-20'}`}>
+        <Suspense fallback={<PageLoader />}>
+          {page}
+        </Suspense>
+      </main>
       <Footer />
     </div>
   );
@@ -80,13 +87,17 @@ function AppRoutes() {
 
 function App() {
   return (
-    <AuthProvider>
-      <ToastProvider>
-        <CartProvider>
-          <AppRoutes />
-        </CartProvider>
-      </ToastProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <CartProvider>
+            <Suspense fallback={<PageLoader />}>
+              <AppRoutes />
+            </Suspense>
+          </CartProvider>
+        </ToastProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
