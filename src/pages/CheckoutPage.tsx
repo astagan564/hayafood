@@ -44,23 +44,29 @@ export function CheckoutPage() {
     setSubmitting(true);
  
     try {
-      const { data: order, error: orderError } = await supabase
+      // Generate the order ID on the client side so we don't need
+      // .select() after .insert(). Using INSERT...RETURNING with the
+      // anon role triggers a PostgREST false-positive RLS error because
+      // anon has no SELECT policy on orders, causing RETURNING to return
+      // 0 rows — which PostgREST misinterprets as an INSERT RLS violation.
+      const newOrderId = crypto.randomUUID();
+
+      const { error: orderError } = await supabase
         .from('orders')
         .insert({
+          id: newOrderId,
           nama_pembeli: form.nama_pembeli.trim(),
           nomor_telepon: form.nomor_telepon.trim(),
           alamat: form.alamat.trim(),
           catatan: form.catatan.trim() || null,
           total: totalPrice,
           status: 'baru',
-        })
-        .select()
-        .single();
+        });
  
       if (orderError) throw orderError;
  
       const orderItems = items.map((item) => ({
-        order_id: order.id,
+        order_id: newOrderId,
         product_id: item.product.id,
         nama_product: item.product.nama,
         jumlah: item.jumlah,
@@ -70,13 +76,13 @@ export function CheckoutPage() {
       const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
       if (itemsError) {
         // Rollback: delete the created order if items insertion fails
-        await supabase.from('orders').delete().eq('id', order.id);
+        await supabase.from('orders').delete().eq('id', newOrderId);
         throw itemsError;
       }
  
       // Save items and total before clearing the cart
       setCompletedOrder({ items: [...items], total: totalPrice });
-      setOrderId(order.id);
+      setOrderId(newOrderId);
       clearCart();
       show('Pesanan berhasil dibuat!');
     } catch (err) {
